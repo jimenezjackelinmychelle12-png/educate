@@ -11,7 +11,7 @@ import ProtectedRoute from './routes/ProtectedRoute.jsx'
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/Login",
     element: <Login />,
   },
   {
@@ -23,17 +23,17 @@ const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "dashboard",
+        path: "/dashboard",
         element: <Dashboard />,
       },
     ],
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById('root')/* as HTMLElement*/ ).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-    <RouterProvider router={router} />
+      <RouterProvider router={router} />
     </AuthProvider>
   </React.StrictMode>,
 )
