@@ -7,6 +7,7 @@ import Login from './routes/login.jsx'
 import Signup from './routes/Singnup.jsx'
 import Dashboard from './routes/Dashboard.jsx'
 import ProtectedRoute from './routes/ProtectedRoute.jsx'
+//Import HTMLElement from 'html-element'
 
 const router = createBrowserRouter([
   {
@@ -29,8 +30,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')/* as HTMLElement*/ ).render(
+  <React.StrictMode>
+    <AuthProvider>
     <RouterProvider router={router} />
-  </StrictMode>,
+    </AuthProvider>
+  </React.StrictMode>,
 )

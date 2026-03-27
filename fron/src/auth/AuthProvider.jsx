@@ -1,12 +1,19 @@
 import { useContext, createContext, useState, useEffect } from "react";
 
-interface AuthContextType {
-    children: React.ReactNode;
-}
-const AuthContext = createContext(null);
+/**
+ * @typedef {Object} AuthProviderProps
+ * @property {React.ReactNode} children
+ */
 
-export const AuthProvider = ({ children }: AuthContextType) => {
-    const [isAuth, setIsAuth] = useState(false);
+const AuthContext = createContext({
+    isAuthenticated: false,
+});
+
+/**
+ * @param {AuthProviderProps} props
+ */
+export const AuthProvider = ({ children }) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -16,7 +23,7 @@ export const AuthProvider = ({ children }: AuthContextType) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuth, setIsAuth }}>
+        <AuthContext.Provider value={{ isAuthenticated }}>
             {children}
         </AuthContext.Provider>
     );
