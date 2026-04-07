@@ -1,0 +1,54 @@
+// src/VerifyOtp.jsx
+import { useState } from "react";
+import axios from "axios";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+
+function VerifyOtp() {
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const navigate = useNavigate();
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:9095/api/otp/verify", { email, code });
+      setMensaje("✅ " + res.data);
+      setTimeout(() => navigate("/cambiar", { state: { email } }), 1000);
+    } catch (err) {
+      setMensaje("❌ " + (err.response?.data || "Error"));
+    }
+  };
+
+  return (
+    <Container>
+      <Card>
+        <h2>Verificar OTP</h2>
+        <form onSubmit={handleVerify}>
+          <label>Correo</label>
+          <input type="email" placeholder="Ingresa tu correo" value={email} onChange={e => setEmail(e.target.value)} required />
+          <label>Código OTP</label>
+          <input type="text" placeholder="123456" value={code} maxLength={6} onChange={e => setCode(e.target.value.replace(/\D/g, ""))} required />
+          <button type="submit">Verificar</button>
+        </form>
+        {mensaje && <p className="mensaje">{mensaje}</p>}
+      </Card>
+    </Container>
+  );
+}
+
+export default VerifyOtp;
+
+const Container = styled.div`height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f2f5;`;
+const Card = styled.div`
+  width:350px;padding:30px;border-radius:12px;background:white;box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  h2{text-align:center;margin-bottom:20px;}
+  form{display:flex;flex-direction:column;}
+  label{margin-top:10px;font-weight:bold;}
+  input{margin-top:5px;padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;}
+  input:focus{border:2px solid #00ce9e;}
+  button{margin-top:20px;padding:10px;border:none;border-radius:6px;background:#f9690e;color:white;font-size:16px;cursor:pointer;transition:0.3s;}
+  button:hover{background:#d35400;}
+  .mensaje{margin-top:15px;text-align:center;font-weight:bold;}
+`;
