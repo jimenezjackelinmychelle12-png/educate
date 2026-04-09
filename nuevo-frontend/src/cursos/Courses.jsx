@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaUser } from "react-icons/fa";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
@@ -9,6 +10,19 @@ function Courses() {
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const [priceFilter, setPriceFilter] = useState("");
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [showPriceMenu, setShowPriceMenu] = useState( false);  
+
+  const handleHover = (e, hover) => {
+    if (hover) {
+      e.target.style.background = "#ce1717";
+      e.target.style.color = "#fff";
+    } else {
+      e.target.style.background = "rgba(206, 23, 23, 0.1)";
+      e.target.style.color = "#ce1717";
+    }
+  };
 
   useEffect(() => {
     const fakeCourses = [
@@ -18,6 +32,8 @@ function Courses() {
         description: "Aprende React paso a paso",
         category: "Desarrollo",
         date: "2024-01-10",
+        price: 49,
+        duration: "10 horas",
         image: "https://thumbs.dreamstime.com/b/cursos-en-l%C3%ADnea-en-la-peque%C3%B1a-pizarra-d-79511605.jpg",
       },
       {
@@ -26,6 +42,8 @@ function Courses() {
         description: "Domina JavaScript moderno",
         category: "Desarrollo",
         date: "2024-02-15",
+        price: 79,
+        duration: "15 horas",
         image: "https://www.webempresa.com/university/wp-content/uploads/2023/12/Curso-WP-basico-Tema-80.jpg",
       },
       {
@@ -34,6 +52,8 @@ function Courses() {
         description: "Crea APIs profesionales",
         category: "Tecnología",
         date: "2024-03-01",
+        price: 120,
+        duration: "20 horas",
         image: "https://www.univalle.edu/wp-content/uploads/2024/10/orator.jpg",
       },
       {
@@ -42,38 +62,8 @@ function Courses() {
         description: "Estrategias modernas",
         category: "Negocios",
         date: "2024-04-10",
-        image: "https://picsum.photos/300/200?random=4",
-      },
-      {
-        id: 1,
-        title: "React desde cero",
-        description: "Aprende React paso a paso",
-        category: "Desarrollo",
-        date: "2024-01-10",
-        image: "https://thumbs.dreamstime.com/b/cursos-en-l%C3%ADnea-en-la-peque%C3%B1a-pizarra-d-79511605.jpg",
-      },
-      {
-        id: 2,
-        title: "JavaScript Master",
-        description: "Domina JavaScript moderno",
-        category: "Desarrollo",
-        date: "2024-02-15",
-        image: "https://www.webempresa.com/university/wp-content/uploads/2023/12/Curso-WP-basico-Tema-80.jpg",
-      },
-      {
-        id: 3,
-        title: "Node.js Backend",
-        description: "Crea APIs profesionales",
-        category: "Tecnología",
-        date: "2024-03-01",
-        image: "https://www.univalle.edu/wp-content/uploads/2024/10/orator.jpg",
-      },
-      {
-        id: 4,
-        title: "Marketing Digital",
-        description: "Estrategias modernas",
-        category: "Negocios",
-        date: "2024-04-10",
+        price: 60,
+        duration: "8 horas",
         image: "https://picsum.photos/300/200?random=4",
       },
     ];
@@ -85,7 +75,7 @@ function Courses() {
     }, 1000);
   }, []);
 
-  // 🔥 FILTRO
+  // 🔥 FILTROS
   useEffect(() => {
     let filtered = courses;
 
@@ -97,8 +87,20 @@ function Courses() {
       filtered = filtered.filter(c => c.date >= selectedDate);
     }
 
+    if (priceFilter) {
+      if (priceFilter === "0-50") {
+        filtered = filtered.filter(c => c.price <= 50);
+      }
+      if (priceFilter === "50-100") {
+        filtered = filtered.filter(c => c.price > 50 && c.price <= 100);
+      }
+      if (priceFilter === "100+") {
+        filtered = filtered.filter(c => c.price > 100);
+      }
+    }
+
     setFilteredCourses(filtered);
-  }, [selectedCategory, selectedDate, courses]);
+  }, [selectedCategory, selectedDate, priceFilter, courses]);
 
   if (loading) {
     return <h2 style={{ textAlign: "center" }}>Cargando cursos...</h2>;
@@ -106,65 +108,66 @@ function Courses() {
 
   return (
     <div style={styles.container}>
-      
-      {/* 🔝 NAVBAR */}
+      {/* NAVBAR */}
       <div style={styles.navbar}>
-        <h2 style={{ margin: 0 }}>Mi Plataforma</h2>
+        <h2>Mi Plataforma</h2>
 
         {/* 🔽 CATEGORÍAS */}
-        <div
-          style={styles.menuTrigger}
-          onMouseEnter={() => setShowMenu(true)}
-          onMouseLeave={() => setShowMenu(false)}
+<div style={styles.menuTrigger}>
+  <span onClick={() => {
+    setShowCategoryMenu(!showCategoryMenu);
+    setShowPriceMenu(false);
+  }}>
+    Categorías {showCategoryMenu ? "▲" : "▼"}
+  </span>
+
+  {showCategoryMenu && (
+    <div style={styles.dropdown}>
+      {["Desarrollo", "Negocios", "Tecnología"].map((cat) => (
+        <p
+          key={cat}
+          onClick={() => {
+            setSelectedCategory(cat);
+            setShowCategoryMenu(false);
+          }}
+          style={{
+            ...styles.categoryItem,
+            color: selectedCategory === cat ? "#4f46e5" : "#000",
+            fontWeight: selectedCategory === cat ? "bold" : "normal"
+          }}
         >
-          Categorías
-
-          {showMenu && (
-           /* <div style={styles.dropdown}>
-              <div>
-                <p style={styles.menuTitle}>Desarrollo</p>
-                <p onClick={() => setSelectedCategory("Desarrollo")}>React</p>
-                <p onClick={() => setSelectedCategory("Desarrollo")}>Java</p>
-              </div>
-
-              <div>
-                <p style={styles.menuTitle}>Negocios</p>
-                <p onClick={() => setSelectedCategory("Negocios")}>Marketing</p>
-              </div>
-
-              <div>
-                <p style={styles.menuTitle}>Tecnología</p>
-                <p onClick={() => setSelectedCategory("Tecnología")}>IA</p>
-              </div>
-            </div>*/
-            <div style={styles.dropdown}>
-  {["Desarrollo", "Negocios", "Tecnología"].map((cat) => (
-    <p
-      key={cat}
-      onClick={() =>
-        setSelectedCategory(
-          selectedCategory === cat ? "" : cat // 🔥 toggle
-        )
-      }
-      style={{
-        cursor: "pointer",
-        padding: "5px",
-        borderRadius: "5px",
-        background:
-          selectedCategory === cat ? "#4f46e5" : "transparent",
-        color:
-          selectedCategory === cat ? "#fff" : "#000",
-        fontWeight: "bold",
-      }}
-    >
-      {cat}
-    </p>
-  ))}
+          {cat}
+        </p>
+      ))}
+    </div>
+  )}
 </div>
-          )}
-        </div>
 
-        {/* 🔍 FILTRO POR FECHA */}
+{/* 💰 PRECIO */}
+<div style={styles.menuTrigger}>
+  <span onClick={() => {
+    setShowPriceMenu(!showPriceMenu);
+    setShowCategoryMenu(false);
+  }}>
+    Precio {showPriceMenu ? "▲" : "▼"}
+  </span>
+
+  {showPriceMenu && (
+    <div style={styles.dropdown}>
+      <p onClick={() => setPriceFilter("0-50")} style={styles.categoryItem}>
+        $0 - $50
+      </p>
+      <p onClick={() => setPriceFilter("50-100")} style={styles.categoryItem}>
+        $50 - $100
+      </p>
+      <p onClick={() => setPriceFilter("100+")} style={styles.categoryItem}>
+        +$100
+      </p>
+    </div>
+  )}
+</div>
+
+        {/* FECHA */}
         <input
           type="date"
           value={selectedDate}
@@ -172,20 +175,39 @@ function Courses() {
           style={styles.dateInput}
         />
 
-        <div>
-          <Link to="/login" style={styles.link}>Login</Link>
-          <Link to="/register" style={styles.link}>Register</Link>
+        {/* USUARIO */}
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <FaUser style={{ marginRight: "10px" }} />
+
+          <Link
+            to="/login"
+            style={styles.link}
+            onMouseEnter={(e) => handleHover(e, true)}
+            onMouseLeave={(e) => handleHover(e, false)}
+          >
+            Login
+          </Link>
+
+          <Link
+            to="/register"
+            style={styles.link}
+            onMouseEnter={(e) => handleHover(e, true)}
+            onMouseLeave={(e) => handleHover(e, false)}
+          >
+            Register
+          </Link>
         </div>
       </div>
 
       <h1 style={styles.title}>Catálogo de Cursos 📚</h1>
 
-      {/* 🔥 BOTÓN RESET */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+      {/* RESET */}
+      <div style={{ textAlign: "center" }}>
         <button
           onClick={() => {
             setSelectedCategory("");
             setSelectedDate("");
+            setPriceFilter("");
           }}
           style={styles.resetButton}
         >
@@ -193,23 +215,22 @@ function Courses() {
         </button>
       </div>
 
-      {/* 📚 CURSOS */}
+      {/* CURSOS */}
       <div style={styles.grid}>
         {filteredCourses.map((course) => (
           <div key={course.id} style={styles.card}>
-            
-            <img src={course.image} alt={course.title} style={styles.image} />
+            <img src={course.image} alt="" style={styles.image} />
 
             <div style={styles.content}>
               <h3>{course.title}</h3>
               <p>{course.description}</p>
-              <small>{course.category} | {course.date}</small>
+              <p>📂 {course.category}</p>
+              <p>💰 ${course.price}</p>
+              <p>⏱ {course.duration}</p>
+              <small>{course.date}</small>
 
-              <button style={styles.button}>
-                Ver curso
-              </button>
+              <button style={styles.button}>Ver curso</button>
             </div>
-
           </div>
         ))}
       </div>
@@ -219,31 +240,67 @@ function Courses() {
 
 const styles = {
   container: {
-    fontFamily: "Arial",
-    background: "#f8fafc",
-    minHeight: "100vh"
+    minHeight: "100vh",
+    backgroundImage: `
+      linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+      url('https://images.unsplash.com/photo-1523240795612-9a054b0db644')
+    `,
+    backgroundSize: "cover",
+    backgroundPosition: "center"
   },
 
   navbar: {
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
-    padding: "15px 30px",
+    alignItems: "center",
     background: "#fff",
-    borderBottom: "1px solid #ddd",
-    position: "relative",
-    gap: "20px"
+    padding: "15px 30px"
+  },
+
+  menuTrigger: {
+  position: "relative",
+  cursor: "pointer",
+  fontWeight: "bold",
+  padding: "8px 12px",
+  borderRadius: "8px",
+  background: "#f1f5f9",
+  transition: "0.3s"
+},
+
+  dropdown: {
+    position: "absolute",
+    top: "60px",
+    background: "#fff",
+    padding: "20px",
+    display: "flex",
+    gap: "40px",
+    borderRadius: "10px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.15)"
+  },
+
+  categoryItem: {
+    cursor: "pointer",
+    padding: "5px"
+  },
+
+  menuTitle: {
+    fontWeight: "bold"
   },
 
   link: {
-    marginLeft: "15px",
+    marginLeft: "10px",
+    padding: "8px 15px",
+    borderRadius: "8px",
+    border: "1px solid #ce1717",
+    background: "rgba(206,23,23,0.1)",
     textDecoration: "none",
-    color: "#333",
-    fontWeight: "bold"
+    color: "#ce1717"
   },
 
   title: {
     textAlign: "center",
+    color: "#fff",
+    fontSize: "40px",
     marginTop: "20px"
   },
 
@@ -257,8 +314,7 @@ const styles = {
   card: {
     background: "#fff",
     borderRadius: "10px",
-    overflow: "hidden",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
+    overflow: "hidden"
   },
 
   image: {
@@ -272,53 +328,25 @@ const styles = {
   },
 
   button: {
-    marginTop: "10px",
     width: "100%",
     padding: "10px",
-    border: "none",
-    borderRadius: "6px",
     background: "#4f46e5",
     color: "#fff",
-    cursor: "pointer"
+    border: "none",
+    borderRadius: "6px"
   },
 
   resetButton: {
+    margin: "10px",
     padding: "8px 15px",
-    border: "none",
     background: "#ef4444",
     color: "#fff",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-
-  menuTrigger: {
-    position: "relative",
-    cursor: "pointer",
-    fontWeight: "bold"
-  },
-
-  dropdown: {
-    position: "absolute",
-    top: "30px",
-    left: "0",
-    display: "flex",
-    gap: "40px",
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-    zIndex: 1000
-  },
-
-  menuTitle: {
-    fontWeight: "bold",
-    marginBottom: "10px"
+    border: "none",
+    borderRadius: "6px"
   },
 
   dateInput: {
-    padding: "6px",
-    borderRadius: "6px",
-    border: "1px solid #ccc"
+    padding: "6px"
   }
 };
 
