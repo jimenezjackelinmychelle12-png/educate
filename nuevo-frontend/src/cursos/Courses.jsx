@@ -6,23 +6,13 @@ function Courses() {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showMenu, setShowMenu] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
-  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
-  const [showPriceMenu, setShowPriceMenu] = useState( false);  
 
-  const handleHover = (e, hover) => {
-    if (hover) {
-      e.target.style.background = "#ce1717";
-      e.target.style.color = "#fff";
-    } else {
-      e.target.style.background = "rgba(206, 23, 23, 0.1)";
-      e.target.style.color = "#ce1717";
-    }
-  };
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [showPriceMenu, setShowPriceMenu] = useState(false);
 
   useEffect(() => {
     const fakeCourses = [
@@ -88,84 +78,77 @@ function Courses() {
     }
 
     if (priceFilter) {
-      if (priceFilter === "0-50") {
-        filtered = filtered.filter(c => c.price <= 50);
-      }
-      if (priceFilter === "50-100") {
-        filtered = filtered.filter(c => c.price > 50 && c.price <= 100);
-      }
-      if (priceFilter === "100+") {
-        filtered = filtered.filter(c => c.price > 100);
-      }
+      if (priceFilter === "0-50") filtered = filtered.filter(c => c.price <= 50);
+      if (priceFilter === "50-100") filtered = filtered.filter(c => c.price > 50 && c.price <= 100);
+      if (priceFilter === "100+") filtered = filtered.filter(c => c.price > 100);
     }
 
     setFilteredCourses(filtered);
   }, [selectedCategory, selectedDate, priceFilter, courses]);
 
   if (loading) {
-    return <h2 style={{ textAlign: "center" }}>Cargando cursos...</h2>;
+    return <h2 style={{ textAlign: "center", color: "white" }}>Cargando cursos...</h2>;
   }
 
   return (
     <div style={styles.container}>
+      
       {/* NAVBAR */}
       <div style={styles.navbar}>
-        <h2>Mi Plataforma</h2>
+        <h2 style={{ color: "#1e293b" }}>Mi Plataforma</h2>
 
-        {/* 🔽 CATEGORÍAS */}
-<div style={styles.menuTrigger}>
-  <span onClick={() => {
-    setShowCategoryMenu(!showCategoryMenu);
-    setShowPriceMenu(false);
-  }}>
-    Categorías {showCategoryMenu ? "▲" : "▼"}
-  </span>
+        <div style={{ display: "flex", gap: "15px" }}>
+          
+          {/* CATEGORÍAS */}
+          <div style={styles.menuTrigger}>
+            <span onClick={() => {
+              setShowCategoryMenu(!showCategoryMenu);
+              setShowPriceMenu(false);
+            }}>
+              Categorías {showCategoryMenu ? "▲" : "▼"}
+            </span>
 
-  {showCategoryMenu && (
-    <div style={styles.dropdown}>
-      {["Desarrollo", "Negocios", "Tecnología"].map((cat) => (
-        <p
-          key={cat}
-          onClick={() => {
-            setSelectedCategory(cat);
-            setShowCategoryMenu(false);
-          }}
-          style={{
-            ...styles.categoryItem,
-            color: selectedCategory === cat ? "#4f46e5" : "#000",
-            fontWeight: selectedCategory === cat ? "bold" : "normal"
-          }}
-        >
-          {cat}
-        </p>
-      ))}
-    </div>
-  )}
-</div>
+            {showCategoryMenu && (
+              <div style={styles.dropdown}>
+                {["Desarrollo", "Negocios", "Tecnología"].map((cat) => (
+                  <p
+                    key={cat}
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setShowCategoryMenu(false);
+                    }}
+                    style={{
+                      ...styles.categoryItem,
+                      color: selectedCategory === cat ? "#4f46e5" : "#000",
+                      fontWeight: selectedCategory === cat ? "bold" : "normal"
+                    }}
+                  >
+                    {cat}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
 
-{/* 💰 PRECIO */}
-<div style={styles.menuTrigger}>
-  <span onClick={() => {
-    setShowPriceMenu(!showPriceMenu);
-    setShowCategoryMenu(false);
-  }}>
-    Precio {showPriceMenu ? "▲" : "▼"}
-  </span>
+          {/* PRECIO */}
+          <div style={styles.menuTrigger}>
+            <span onClick={() => {
+              setShowPriceMenu(!showPriceMenu);
+              setShowCategoryMenu(false);
+            }}>
+              Precio {showPriceMenu ? "▲" : "▼"}
+            </span>
 
-  {showPriceMenu && (
-    <div style={styles.dropdown}>
-      <p onClick={() => setPriceFilter("0-50")} style={styles.categoryItem}>
-        $0 - $50
-      </p>
-      <p onClick={() => setPriceFilter("50-100")} style={styles.categoryItem}>
-        $50 - $100
-      </p>
-      <p onClick={() => setPriceFilter("100+")} style={styles.categoryItem}>
-        +$100
-      </p>
-    </div>
-  )}
-</div>
+            {showPriceMenu && (
+              <div style={styles.dropdown}>
+                <p onClick={() => setPriceFilter("0-50")} style={styles.categoryItem}>$0 - $50</p>
+                <p onClick={() => setPriceFilter("50-100")} style={styles.categoryItem}>$50 - $100</p>
+                <p onClick={() => setPriceFilter("100+")} style={styles.categoryItem}>+$100</p>
+              </div>
+            )}
+          </div>
+
+        </div>
 
         {/* FECHA */}
         <input
@@ -177,25 +160,10 @@ function Courses() {
 
         {/* USUARIO */}
         <div style={{ display: "flex", alignItems: "center" }}>
-          <FaUser style={{ marginRight: "10px" }} />
+          <FaUser style={{ marginRight: "10px", color: "#4f46e5" }} />
 
-          <Link
-            to="/login"
-            style={styles.link}
-            onMouseEnter={(e) => handleHover(e, true)}
-            onMouseLeave={(e) => handleHover(e, false)}
-          >
-            Login
-          </Link>
-
-          <Link
-            to="/register"
-            style={styles.link}
-            onMouseEnter={(e) => handleHover(e, true)}
-            onMouseLeave={(e) => handleHover(e, false)}
-          >
-            Register
-          </Link>
+          <Link to="/login" style={styles.link}>Login</Link>
+          <Link to="/register" style={styles.link}>Register</Link>
         </div>
       </div>
 
@@ -238,83 +206,87 @@ function Courses() {
   );
 }
 
+//////////////////////////////////////
+// 🎨 ESTILOS PRO (MISMO LOGIN)
+//////////////////////////////////////
+
 const styles = {
   container: {
     minHeight: "100vh",
     backgroundImage: `
-      linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+      linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
       url('https://images.unsplash.com/photo-1523240795612-9a054b0db644')
     `,
     backgroundSize: "cover",
-    backgroundPosition: "center"
+    backgroundPosition: "center",
   },
 
   navbar: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: "#fff",
-    padding: "15px 30px"
+    padding: "15px 30px",
+    background: "rgba(255,255,255,0.9)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "0 0 12px 12px"
   },
 
   menuTrigger: {
-  position: "relative",
-  cursor: "pointer",
-  fontWeight: "bold",
-  padding: "8px 12px",
-  borderRadius: "8px",
-  background: "#f1f5f9",
-  transition: "0.3s"
-},
+    position: "relative",
+    cursor: "pointer",
+    fontWeight: "bold",
+    padding: "8px 14px",
+    borderRadius: "8px",
+    background: "#f1f5f9"
+  },
 
   dropdown: {
     position: "absolute",
-    top: "60px",
+    top: "50px",
     background: "#fff",
-    padding: "20px",
-    display: "flex",
-    gap: "40px",
+    padding: "15px",
     borderRadius: "10px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.15)"
+    boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
   },
 
   categoryItem: {
     cursor: "pointer",
-    padding: "5px"
-  },
-
-  menuTitle: {
-    fontWeight: "bold"
+    padding: "6px"
   },
 
   link: {
     marginLeft: "10px",
-    padding: "8px 15px",
+    padding: "8px 16px",
     borderRadius: "8px",
-    border: "1px solid #ce1717",
-    background: "rgba(206,23,23,0.1)",
+    border: "1px solid #4f46e5",
+    background: "rgba(79,70,229,0.1)",
     textDecoration: "none",
-    color: "#ce1717"
+    color: "#4f46e5",
+    fontWeight: "bold"
   },
 
   title: {
     textAlign: "center",
     color: "#fff",
-    fontSize: "40px",
-    marginTop: "20px"
+    fontSize: "42px",
+    marginTop: "30px",
+    textShadow: "2px 2px 10px rgba(0,0,0,0.7)"
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "20px",
-    padding: "20px"
+    padding: "30px"
   },
 
   card: {
-    background: "#fff",
-    borderRadius: "10px",
-    overflow: "hidden"
+    background: "rgba(255,255,255,0.95)",
+    borderRadius: "12px",
+    overflow: "hidden",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+    transition: "0.3s"
   },
 
   image: {
@@ -330,23 +302,28 @@ const styles = {
   button: {
     width: "100%",
     padding: "10px",
-    background: "#4f46e5",
+    background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
     color: "#fff",
     border: "none",
-    borderRadius: "6px"
+    borderRadius: "8px",
+    cursor: "pointer",
+    marginTop: "10px"
   },
 
   resetButton: {
-    margin: "10px",
-    padding: "8px 15px",
+    margin: "15px",
+    padding: "10px 18px",
     background: "#ef4444",
     color: "#fff",
     border: "none",
-    borderRadius: "6px"
+    borderRadius: "8px",
+    cursor: "pointer"
   },
 
   dateInput: {
-    padding: "6px"
+    padding: "8px",
+    borderRadius: "8px",
+    border: "1px solid #ccc"
   }
 };
 

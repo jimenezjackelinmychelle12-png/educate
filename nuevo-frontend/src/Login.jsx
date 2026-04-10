@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
+//import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -41,7 +43,9 @@ function Login() {
   return (
     <Container>
       <Overlay />
-
+      <BackButton onClick={() => navigate(-1)}>
+        <FaArrowLeft /> Volver
+      </BackButton>
       <Card>
         <Title>Bienvenido 👋</Title>
         <Subtitle>Inicia sesión para continuar</Subtitle>
@@ -193,5 +197,31 @@ const LinkText = styled.a`
 
   &:hover {
     text-decoration: underline;
+  }
+`;
+const BackButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+
+  transition: 0.3s;
+
+  &:hover {
+    background: rgba(255,255,255,0.4);
+    transform: translateX(-3px);
   }
 `;
