@@ -64,7 +64,7 @@ function Courses() {
         date: "2024-04-10",
         price: 60,
         duration: "8 horas",
-        image: "https://picsum.photos/300/200?random=4",
+        image: "https://bolivia.aprender21.com/images/cursos-online-aprender21.webp",
       },
     ];
 
