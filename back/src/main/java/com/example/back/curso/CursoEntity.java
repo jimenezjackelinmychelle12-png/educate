@@ -1,5 +1,6 @@
 package com.example.back.curso;
 
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -16,6 +17,8 @@ import jakarta.persistence.Table;
 public class CursoEntity {
 
     @Id
+   
+    
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -31,24 +34,27 @@ public class CursoEntity {
 
     private LocalDateTime fechaCreacion;
 
+    private String categoria;
+
     private String etiqueta;
 
     private BigDecimal precio;
 
     private String duracionLeccion;
 
-    // Constructor vacío
     public CursoEntity() {}
 
-    // PrePersist para setear fecha automáticamente
     @PrePersist
     public void prePersist() {
-        this.fechaCreacion = LocalDateTime.now();
-        this.activo = true;
+        if (this.fechaCreacion == null) {
+            this.fechaCreacion = LocalDateTime.now();
+        }
+        if (this.activo == null) {
+            this.activo = true;
+        }
     }
 
-    // Getters y Setters
-
+    // GETTERS Y SETTERS
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -66,6 +72,9 @@ public class CursoEntity {
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
 
     public String getEtiqueta() { return etiqueta; }
     public void setEtiqueta(String etiqueta) { this.etiqueta = etiqueta; }
