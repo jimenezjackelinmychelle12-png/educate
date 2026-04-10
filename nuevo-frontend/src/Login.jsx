@@ -46,6 +46,10 @@ function Login() {
       <BackButton onClick={() => navigate(-1)}>
         <FaArrowLeft /> Volver
       </BackButton>
+      <DemoButton onClick={() => navigate("/demo")}>
+        🚀 Demo
+      </DemoButton>
+
       <Card>
         <Title>Bienvenido 👋</Title>
         <Subtitle>Inicia sesión para continuar</Subtitle>
@@ -223,5 +227,33 @@ const BackButton = styled.button`
   &:hover {
     background: rgba(255,255,255,0.4);
     transform: translateX(-3px);
+  }
+`;
+const DemoButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+
+  background: linear-gradient(135deg, #4f46e5, #22c55e);
+  color: white;
+  font-weight: bold;
+
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+
+  transition: 0.3s;
+  z-index: 2;
+
+  &:hover {
+    background: rgba(255,255,255,0.4);
+    transform: translateX(3px);
   }
 `;

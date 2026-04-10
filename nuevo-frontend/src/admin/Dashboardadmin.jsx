@@ -233,5 +233,3 @@ const Dashboardadmin = () => {
 };
 
 export default Dashboardadmin;
-
-export default Dashboardadmin;
