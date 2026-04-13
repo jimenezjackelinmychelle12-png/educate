@@ -4,17 +4,22 @@ package com.example.back.usuario;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UsuarioService {
+private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
 
+    // 📋 LISTAR ENTIDADES
+    public List<UsuarioEntity> listar() {
+        return usuarioRepository.findAll();
+    }
 
-    // Listar usuarios como DTO
+    // 📋 LISTAR DTO (para React)
     public List<UsuarioDto> listarUsuarios() {
         return usuarioRepository.findAll()
                 .stream()
@@ -29,18 +34,24 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    // Guardar un usuario
-
+    // 💾 GUARDAR
     public UsuarioEntity guardar(UsuarioEntity usuario) {
-        UsuarioEntity guardado = usuarioRepository.save(usuario);
-
-        return guardado;
+        return usuarioRepository.save(usuario);
     }
 
-    // Buscar por correo
+    // 🔍 BUSCAR POR ID
+    public UsuarioEntity buscarPorId(Long id) {
+        return usuarioRepository.findById(id).orElse(null);
+    }
+
+    // 🔍 BUSCAR POR CORREO
     public UsuarioEntity buscarPorCorreo(String correo) {
         return usuarioRepository.findByCorreo(correo).orElse(null);
     }
 
-}
+    // ❌ ELIMINAR
+    public void eliminar(Long id) {
+        usuarioRepository.deleteById(id);
+    }
 
+}    

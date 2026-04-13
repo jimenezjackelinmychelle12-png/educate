@@ -4,19 +4,26 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.back.historial.HistorialLoginService;
-import com.example.back.login.LoginRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 
-@CrossOrigin(origins = "http://localhost:3000") // ✅ React
+
+
+
+
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
@@ -42,59 +49,68 @@ public class UsuarioController {
         return usuarioService.guardar(usuario);
     }
 
+    // 🔄 CAMBIAR TIPO
+    @PutMapping("/{id}/tipo")
+    public ResponseEntity<?> cambiarTipo(@PathVariable Long id,
+                                         @RequestBody TipoRequest request) {
 
-    // UsuarioController.java
-@PostMapping("/cambiar-password")
-public ResponseEntity<String> cambiarPassword(@RequestBody PasswordChangeRequest request) {
+        UsuarioEntity usuario = usuarioService.buscarPorId(id);
 
-    var usuario = usuarioService.buscarPorCorreo(request.getCorreo());
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuario no encontrado");
+        }
 
-    if (usuario == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                             .body("Usuario no encontrado");
+        usuario.setTipo(request.getTipo());
+        usuarioService.guardar(usuario);
+
+        return ResponseEntity.ok("Tipo actualizado");
     }
 
-    // Cambiar la contraseña
-    usuario.setPassword(request.getNuevaPassword());
-    usuarioService.guardar(usuario); // Guardar cambios en DB
+    // ❌ ELIMINAR USUARIO
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
 
-    return ResponseEntity.ok("Contraseña cambiada correctamente");
+        UsuarioEntity usuario = usuarioService.buscarPorId(id);
 
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuario no encontrado");
+        }
 
-}
+        usuarioService.eliminar(id);
 
+        return ResponseEntity.ok("Usuario eliminado");
+    }
 
-
-
-    // 🔐 LOGIN (CORREGIDO)
+    // 🔐 LOGIN
     @PostMapping("/login")
     public ResponseEntity<UsuarioDto> login(@RequestBody LoginRequest loginRequest,
                                             HttpServletRequest request) {
 
-        var usuario = usuarioService.buscarPorCorreo(loginRequest.getCorreo());
+        UsuarioEntity usuario = usuarioService.buscarPorCorreo(loginRequest.getCorreo());
 
-        // ✅ VALIDAR antes de usar usuario
-        if (usuario != null && usuario.getPassword().equals(loginRequest.getPassword())) {
+        if (usuario != null &&
+            usuario.getPassword().equals(loginRequest.getPassword())) {
 
-            String ipCliente = request.getRemoteAddr();
+            String ip = request.getRemoteAddr();
 
-            // ✅ registrar solo si login es correcto
             historialLoginService.registrarLogin(
-                Math.toIntExact(usuario.getId()),
-                usuario.getCorreo(),
-                ipCliente
+                    Math.toIntExact(usuario.getId()),
+                    usuario.getCorreo(),
+                    ip
             );
 
-            UsuarioDto dto = new UsuarioDto(
-                usuario.getId(),
-                usuario.getNombre(),
-                usuario.getApellidoPaterno(),
-                usuario.getApellidoMaterno(),
-                usuario.getCorreo(),
-                usuario.getTipo()
+            return ResponseEntity.ok(
+                    new UsuarioDto(
+                            usuario.getId(),
+                            usuario.getNombre(),
+                            usuario.getApellidoPaterno(),
+                            usuario.getApellidoMaterno(),
+                            usuario.getCorreo(),
+                            usuario.getTipo()
+                    )
             );
-
-            return ResponseEntity.ok(dto);
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
