@@ -4,123 +4,86 @@ import { FaUser } from "react-icons/fa";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
-  const [filteredCourses, setFilteredCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [categoria, setCategoria] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
 
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [showPriceMenu, setShowPriceMenu] = useState(false);
 
   useEffect(() => {
-    const fakeCourses = [
-      {
-        id: 1,
-        title: "React desde cero",
-        description: "Aprende React paso a paso",
-        category: "Desarrollo",
-        date: "2024-01-10",
-        price: 49,
-        duration: "10 horas",
-        image: "https://thumbs.dreamstime.com/b/cursos-en-l%C3%ADnea-en-la-peque%C3%B1a-pizarra-d-79511605.jpg",
-      },
-      {
-        id: 2,
-        title: "JavaScript Master",
-        description: "Domina JavaScript moderno",
-        category: "Desarrollo",
-        date: "2024-02-15",
-        price: 79,
-        duration: "15 horas",
-        image: "https://www.webempresa.com/university/wp-content/uploads/2023/12/Curso-WP-basico-Tema-80.jpg",
-      },
-      {
-        id: 3,
-        title: "Node.js Backend",
-        description: "Crea APIs profesionales",
-        category: "Tecnología",
-        date: "2024-03-01",
-        price: 120,
-        duration: "20 horas",
-        image: "https://www.univalle.edu/wp-content/uploads/2024/10/orator.jpg",
-      },
-      {
-        id: 4,
-        title: "Marketing Digital",
-        description: "Estrategias modernas",
-        category: "Negocios",
-        date: "2024-04-10",
-        price: 60,
-        duration: "8 horas",
-        image: "https://bolivia.aprender21.com/images/cursos-online-aprender21.webp",
-      },
-    ];
+    const fetchCourses = async () => {
+      try {
+        let url = `http://localhost:9095/cursos?pageNumber=${page}&pageSize=6`;
 
-    setTimeout(() => {
-      setCourses(fakeCourses);
-      setFilteredCourses(fakeCourses);
-      setLoading(false);
-    }, 1000);
-  }, []);
+        if (categoria && categoria.trim() !== "") {
+          url += `&categoria=${categoria}`;
+        }
 
-  // 🔥 FILTROS
-  useEffect(() => {
-    let filtered = courses;
+        if (priceFilter) {
+          if (priceFilter === "0-50") url += `&precioMin=0&precioMax=50`;
+          if (priceFilter === "50-100") url += `&precioMin=50&precioMax=100`;
+          if (priceFilter === "100+") url += `&precioMin=100`;
+        }
 
-    if (selectedCategory) {
-      filtered = filtered.filter(c => c.category === selectedCategory);
-    }
+        const res = await fetch(url);
+        const data = await res.json();
 
-    if (selectedDate) {
-      filtered = filtered.filter(c => c.date >= selectedDate);
-    }
+        setCourses(data.content || []);
+        setTotalPages(data.totalPages || 0);
 
-    if (priceFilter) {
-      if (priceFilter === "0-50") filtered = filtered.filter(c => c.price <= 50);
-      if (priceFilter === "50-100") filtered = filtered.filter(c => c.price > 50 && c.price <= 100);
-      if (priceFilter === "100+") filtered = filtered.filter(c => c.price > 100);
-    }
+        window.scrollTo({ top: 0, behavior: "smooth" });
 
-    setFilteredCourses(filtered);
-  }, [selectedCategory, selectedDate, priceFilter, courses]);
+      } catch (err) {
+        console.error(err);
+        setCourses([]);
+      }
+    };
 
-  if (loading) {
-    return <h2 style={{ textAlign: "center", color: "white" }}>Cargando cursos...</h2>;
-  }
+    fetchCourses();
+  }, [page, categoria, priceFilter]);
+
+  const getPages = () => {
+    const start = Math.max(0, page - 2);
+    const end = Math.min(totalPages, page + 3);
+    return [...Array(end - start).keys()].map(i => start + i);
+  };
 
   return (
     <div style={styles.container}>
-      
-      {/* NAVBAR */}
-      <div style={styles.navbar}>
-        <h2 style={{ color: "#1e293b" }}>Mi Plataforma</h2>
 
+      {/* 🔥 NAVBAR COMPLETO */}
+      <div style={styles.navbar}>
+
+        <h2 style={{ color: "#1e293b" }}>EduPlatform</h2>
+
+        {/* 🔥 FILTROS EN NAVBAR */}
         <div style={{ display: "flex", gap: "15px" }}>
-          
-          {/* CATEGORÍAS */}
+
+          {/* CATEGORÍA */}
           <div style={styles.menuTrigger}>
             <span onClick={() => {
               setShowCategoryMenu(!showCategoryMenu);
               setShowPriceMenu(false);
             }}>
-              Categorías {showCategoryMenu ? "▲" : "▼"}
+              Categoría {showCategoryMenu ? "▼" : "▲"}
             </span>
 
             {showCategoryMenu && (
               <div style={styles.dropdown}>
-                {["Desarrollo", "Negocios", "Tecnología"].map((cat) => (
+                {["Programación","Backend","Frontend","Desarrollo", "negocios"].map((cat) => (
+
                   <p
                     key={cat}
+                    style={styles.categoryItem}
+                    onMouseEnter={(e) => e.target.style.background = "#f1f5f9"}
+                    onMouseLeave={(e) => e.target.style.background = "transparent"}
                     onClick={() => {
-                      setSelectedCategory(cat);
+                      setCategoria(cat);
+                      setPage(0);
                       setShowCategoryMenu(false);
-                    }}
-                    style={{
-                      ...styles.categoryItem,
-                      color: selectedCategory === cat ? "#4f46e5" : "#000",
-                      fontWeight: selectedCategory === cat ? "bold" : "normal"
                     }}
                   >
                     {cat}
@@ -136,29 +99,33 @@ function Courses() {
               setShowPriceMenu(!showPriceMenu);
               setShowCategoryMenu(false);
             }}>
-              Precio {showPriceMenu ? "▲" : "▼"}
+              Precio {showPriceMenu ? "▼" : "▲"}
             </span>
 
             {showPriceMenu && (
               <div style={styles.dropdown}>
-                <p onClick={() => setPriceFilter("0-50")} style={styles.categoryItem}>$0 - $50</p>
-                <p onClick={() => setPriceFilter("50-100")} style={styles.categoryItem}>$50 - $100</p>
-                <p onClick={() => setPriceFilter("100+")} style={styles.categoryItem}>+$100</p>
+                <p onClick={() => { setPriceFilter("0-50"); setPage(0); }} style={styles.categoryItem}>0 - 50</p>
+                <p onClick={() => { setPriceFilter("50-100"); setPage(0); }} style={styles.categoryItem}>50 - 100</p>
+                <p onClick={() => { setPriceFilter("100+"); setPage(0); }} style={styles.categoryItem}>100+</p>
               </div>
             )}
           </div>
 
+          {/* RESET */}
+          <button
+            onClick={() => {
+              setCategoria("");
+              setPriceFilter("");
+              setPage(0);
+            }}
+            style={styles.resetButton}
+          >
+            Limpiar
+          </button>
+
         </div>
 
-        {/* FECHA */}
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          style={styles.dateInput}
-        />
-
-        {/* USUARIO */}
+        {/* 🔥 USUARIO */}
         <div style={{ display: "flex", alignItems: "center" }}>
           <FaUser style={{ marginRight: "10px", color: "#4f46e5" }} />
 
@@ -169,39 +136,62 @@ function Courses() {
 
       <h1 style={styles.title}>Catálogo de Cursos 📚</h1>
 
-      {/* RESET */}
-      <div style={{ textAlign: "center" }}>
-        <button
-          onClick={() => {
-            setSelectedCategory("");
-            setSelectedDate("");
-            setPriceFilter("");
-          }}
-          style={styles.resetButton}
-        >
-          Limpiar filtros
-        </button>
-      </div>
-
-      {/* CURSOS */}
+      {/* 🔥 GRID */}
       <div style={styles.grid}>
-        {filteredCourses.map((course) => (
-          <div key={course.id} style={styles.card}>
-            <img src={course.image} alt="" style={styles.image} />
+        {courses.length === 0 ? (
+          <p style={{ color: "white" }}>No hay cursos</p>
+        ) : (
+          courses.map((c) => (
+            <div key={c.id} style={styles.card}>
+              <img src={c.imagen || c.image} style={styles.image} />
 
-            <div style={styles.content}>
-              <h3>{course.title}</h3>
-              <p>{course.description}</p>
-              <p>📂 {course.category}</p>
-              <p>💰 ${course.price}</p>
-              <p>⏱ {course.duration}</p>
-              <small>{course.date}</small>
+              <div style={styles.content}>
+                <h3>{c.titulo || c.title}</h3>
 
-              <button style={styles.button}>Ver curso</button>
+                <p>📂 {c.categoria || c.category}</p>
+                <p>💰 ${c.precio || c.price}</p>
+
+                <button style={styles.button}>
+                  Ver curso
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
+
+      {/* 🔥 PAGINACIÓN */}
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+
+        <button
+          disabled={page === 0}
+          onClick={() => setPage(page - 1)}
+        >
+          ⬅
+        </button>
+
+        {getPages().map((num) => (
+          <button
+            key={num}
+            onClick={() => setPage(num)}
+            style={{
+              margin: "0 5px",
+              fontWeight: page === num ? "bold" : "normal"
+            }}
+          >
+            {num + 1}
+          </button>
+        ))}
+
+        <button
+          disabled={page + 1 >= totalPages}
+          onClick={() => setPage(page + 1)}
+        >
+          ➡
+        </button>
+
+      </div>
+
     </div>
   );
 }
@@ -222,14 +212,15 @@ const styles = {
   },
 
   navbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "15px 30px",
-    background: "rgba(255,255,255,0.9)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "0 0 12px 12px"
-  },
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "15px 30px",
+  background: "rgba(255,255,255,0.9)",
+  backdropFilter: "blur(10px)",
+  position: "relative",   // 🔥 CLAVE
+  zIndex: 1000            // 🔥 CLAVE
+},
 
   menuTrigger: {
     position: "relative",
@@ -241,14 +232,29 @@ const styles = {
   },
 
   dropdown: {
-    position: "absolute",
-    top: "50px",
-    background: "#fff",
-    padding: "15px",
-    borderRadius: "10px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
-  },
-
+  position: "absolute",
+  top: "60px",
+  left: "50%",
+  transform: "translateX(-50%)",
+  minWidth: "220px",
+  background: "rgba(255,255,255,0.98)",
+  padding: "15px 10px",
+  borderRadius: "14px",
+  boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+  backdropFilter: "blur(12px)",
+  zIndex: 9999,
+  animation: "fadeDown 0.25s ease"
+},
+categoryItem: {
+  padding: "10px 15px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "0.2s",
+},
+card: {
+  position: "relative",
+  zIndex: 1   // bajo
+},
   categoryItem: {
     cursor: "pointer",
     padding: "6px"
@@ -273,12 +279,14 @@ const styles = {
     textShadow: "2px 2px 10px rgba(0,0,0,0.7)"
   },
 
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "20px",
-    padding: "30px"
-  },
+ grid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "20px",
+  padding: "30px",
+  position: "relative",
+  zIndex: 1   // 🔥 MÁS BAJO
+},
 
   card: {
     background: "rgba(255,255,255,0.95)",
