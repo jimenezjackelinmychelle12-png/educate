@@ -48,7 +48,7 @@ function Courses() {
     */
   }, []);
 
-  
+
   if (loading) {
     return <h2 style={{ textAlign: "center" }}>Cargando cursos...</h2>;
   }
@@ -78,6 +78,7 @@ function Courses() {
     </div>
   );
 }
+
 
 const styles = {
   container: {
