@@ -68,24 +68,29 @@ public ResponseEntity<Page<CursoDto>> listar(
     }
 
     // ===== CREAR =====
-    @PostMapping
-public ResponseEntity<?> crear(@RequestBody(required = false) String body) {
-    System.out.println("BODY: " + body);
-    return ResponseEntity.ok("ok");
-}
+   @PostMapping
+    public ResponseEntity<CursoDto> crear(@RequestBody CursoDto dto) {
+        try {
+            CursoEntity nuevo = cursoService.crear(toEntity(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(nuevo));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+      
     // ===== ACTUALIZAR =====
+     // ===== ACTUALIZAR =====
     @PutMapping("/{id}")
     public ResponseEntity<CursoDto> actualizar(
             @PathVariable Integer id,
             @RequestBody CursoDto dto
     ) {
-        try {
-            CursoEntity actualizado = cursoService.actualizar(id, toEntity(dto));
-            return ResponseEntity.ok(toDTO(actualizado));
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+        CursoEntity actualizado = cursoService.actualizar(id, toEntity(dto));
+        return ResponseEntity.ok(toDTO(actualizado));
     }
+    
 
     // ===== ELIMINAR =====
     @DeleteMapping("/{id}")

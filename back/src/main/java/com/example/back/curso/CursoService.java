@@ -28,7 +28,10 @@ public class CursoService {
     }
 
     // ===== CREAR =====
-    public CursoEntity guardar(CursoEntity curso) {
+    // ===== CREAR =====
+    public CursoEntity crear(CursoEntity curso) {
+        curso.setActivo(true);
+        curso.setFechaCreacion(LocalDateTime.now());
         return cursoRepository.save(curso);
     }
 

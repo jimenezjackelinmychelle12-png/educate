@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.back.historial.HistorialLoginService;
-import com.example.back.login.LoginRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 
