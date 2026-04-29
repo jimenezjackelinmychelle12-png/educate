@@ -1,42 +1,18 @@
 package com.example.back.recuso;
 
+import com.example.back.archivos.ResponseFile;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.util.List;
 
-import jakarta.validation.constraints.NotBlank;
-
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RecursoDTO {
-
     private Integer id;
-    
-    @NotBlank(message = "El nombre del recurso es obligatorio")
     private String nombre;
-    
-    private String tipo;
-
-    // Constructor vacío
-    public RecursoDTO() {}
-
-    // Getters y Setters
-    public Integer getId() { 
-        return id; 
-    }
-
-    public void setId(Integer id) { 
-        this.id = id; 
-    }
-    
-    public String getNombre() { 
-        return nombre; 
-    }
-
-    public void setNombre(String nombre) { 
-        this.nombre = nombre; 
-    }
-    
-    public String getTipo() { 
-        return tipo; 
-    }
-
-    public void setTipo(String tipo) { 
-        this.tipo = tipo; 
-    }
+    private List<ResponseFile> archivos;
 }
