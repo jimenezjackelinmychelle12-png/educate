@@ -1,33 +1,42 @@
 package com.example.back.recuso;
 
+
+import com.example.back.archivos.FileEntity;
 import jakarta.persistence.*;
+import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "recurso")
+@Table(name = "recursos") // Cambiamos el nombre de la tabla para evitar conflicto con la columna
+@Getter 
+@Setter 
+@NoArgsConstructor 
+@AllArgsConstructor 
+@Builder
 public class Recurso {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cod_recurso")  // ✅ CORREGIR: usar cod_recurso
+    @Column(name = "id_recurso") // Nombre claro para la PK
     private Integer id;
 
-    @Column(name = "recurso", nullable = false)  // ✅ CORREGIR: campo se llama "recurso"
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    // Constructor
-    public Recurso() {}
+    @OneToMany(mappedBy = "recurso", 
+               fetch = FetchType.LAZY, 
+               cascade = CascadeType.ALL, 
+               orphanRemoval = true) // Si borras un recurso, borra sus archivos
+    @Builder.Default // Necesario para que Builder no deje la lista nula
+    private List<FileEntity> archivos = new ArrayList<>();
 
-    // Getters and Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-    
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    // ✅ MAPEO CORRECTO según tu entidad Recurso real
-    public RecursoDTO toRecursoDTO() {
-        RecursoDTO dto = new RecursoDTO();
-        dto.setId(this.getId());
-        dto.setNombre(this.getNombre());  // ✅ Solo estos 2 campos existen
-        return dto;
+    /**
+     * Método de conveniencia para agregar archivos 
+     * asegurando que se mantenga la relación bidireccional.
+     */
+    public void addArchivo(FileEntity archivo) {
+        archivos.add(archivo);
+        archivo.setRecurso(this);
     }
 }
