@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
-import "./style.css";
 
 const FileUploader1 = () => {
   const fileInputRef = useRef(null);
@@ -45,48 +44,109 @@ const FileUploader1 = () => {
   };
 
   const fetchFiles = async () => {
-    const res = await axios.get(
-      "http://localhost:9095/api/fileManager/files"
-    );
+    const res = await axios.get("http://localhost:9095/api/fileManager/files");
     setUploadedFiles(res.data);
   };
 
   const downloadFile = (id) => {
-    window.open(
-      `http://localhost:9095/api/fileManager/files/${id}`
-    );
+    window.open(`http://localhost:9095/api/fileManager/files/${id}`);
   };
 
   useEffect(() => {
     fetchFiles();
   }, []);
 
+  // 🎨 ESTILOS INLINE (AISLADO SOLO PARA ESTE COMPONENTE)
+  const styles = {
+    wrapperPage: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "100vh",
+      background: "#6990F2"
+    },
+    wrapper: {
+      width: "430px",
+      background: "#fff",
+      borderRadius: "5px",
+      padding: "30px",
+      boxShadow: "7px 7px 12px rgba(0,0,0,0.05)"
+    },
+    header: {
+      color: "#6990F2",
+      fontSize: "27px",
+      fontWeight: "600",
+      textAlign: "center"
+    },
+    form: {
+      height: "167px",
+      display: "flex",
+      cursor: "pointer",
+      margin: "30px 0",
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "column",
+      borderRadius: "5px",
+      border: "2px dashed #6990F2",
+      color: "#6990F2"
+    },
+    list: {
+      listStyle: "none",
+      padding: 0
+    },
+    item: {
+      background: "#E9F0FF",
+      padding: "10px",
+      marginBottom: "8px",
+      borderRadius: "5px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    },
+    button: {
+      background: "#6990F2",
+      color: "#fff",
+      border: "none",
+      padding: "5px 10px",
+      borderRadius: "5px",
+      cursor: "pointer"
+    }
+  };
+
   return (
-    <div className="wrapper">
-      <header>File Manager</header>
+    <div style={styles.wrapperPage}>
+      <div style={styles.wrapper}>
+        <header style={styles.header}>File Manager</header>
 
-      <div className="form" onClick={handleClick}>
-        <input type="file" hidden ref={fileInputRef} onChange={handleFile} />
-        <p>Click para subir archivo</p>
-      </div>
-
-      {currentFile && (
-        <div>
-          <p>{currentFile}</p>
-          <progress value={progress} max="100" />
+        <div style={styles.form} onClick={handleClick}>
+          <input type="file" hidden ref={fileInputRef} onChange={handleFile} />
+          <p>Click para subir archivo</p>
         </div>
-      )}
 
-      <ul>
-        {uploadedFiles.map((file) => (
-          <li key={file.id}>
-            {file.name} ({(file.size / 1024).toFixed(2)} KB)
-            <button onClick={() => downloadFile(file.id)}>
-              Descargar
-            </button>
-          </li>
-        ))}
-      </ul>
+        {currentFile && (
+          <div>
+            <p>{currentFile}</p>
+            <progress value={progress} max="100" style={{ width: "100%" }} />
+          </div>
+        )}
+
+        <ul style={styles.list}>
+          {uploadedFiles.map((file) => (
+            <li key={file.id} style={styles.item}>
+              <span>
+                {file.name} ({(file.size / 1024).toFixed(2)} KB)
+              </span>
+
+              <button
+                style={styles.button}
+                onClick={() => downloadFile(file.id)}
+              >
+                Descargar
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

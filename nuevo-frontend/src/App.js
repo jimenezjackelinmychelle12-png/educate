@@ -8,11 +8,16 @@ import CambiarPassword from "./password/CambiarPassword";
 import Reportelog from "./Reportelog";
 import Dashboardadmin from "./admin/Dashboardadmin";
 import Dashboardes from "./admin/Dashboardes";
-import Dashboarddoc from "./admin/Dashboarddoc";
+import FileUploader1 from "./FileUploader1";
 import Courses from "./cursos/Courses";
 import DemoApp from "./DemoApp";
-
+import Principal from "./Principal";
 import Profile from "./Profile";
+import Dashboardad2 from "./admin/Dashboard2";
+import InfCur from "./cursos/InfCur";
+import CreateCourse from "./CreateCourse";
+
+
 function App() {
   return (
     <div>
@@ -26,15 +31,20 @@ function App() {
                <Route path="/verify" element= { <VerifyOtp/>} />
                  <Route path="/reporte" element= { <Reportelog/>} />
                  <Route path="/dashboard" element= { <Dashboardadmin/>} />
-                <Route path="/dashboard1" element= { <Dashboarddoc/>} />
+                <Route path="/b" element= { <Dashboardad2/>} />
                 <Route path="/dashboard2" element= { <Dashboardes/>} />
               <Route path="/login" element= { <Login/>} />
                <Route path="/" element= { <Courses/>} />
                 <Route path="/demo" element= { <DemoApp/>} />
                  <Route path="/profile" element= { <Profile/>} />
+                  <Route path="/demo" element= { <DemoApp/>} />
+                 <Route path="/file" element= { <FileUploader1/>} />
+                   <Route path="/curso" element= { <CreateCourse/>} />
+                   <Route path="/a" element={<Principal/>}/>
+                   <Route path="/curso/:id" element={<InfCur />} />
+                   <Route path="/CreateCourse" element={<CreateCourse />} />
             </Routes>
         </BrowserRouter>
-      
     </div>
   );
 }

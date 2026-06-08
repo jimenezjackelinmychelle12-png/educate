@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { FaUser } from "react-icons/fa";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaUser,
+  FaSearch,
+  FaStar,
+  FaClock,
+  FaFilter,
+  FaChevronLeft,
+  FaChevronRight,
+  FaSignOutAlt,
+} from "react-icons/fa";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
@@ -9,24 +18,66 @@ function Courses() {
 
   const [categoria, setCategoria] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
+  const [search, setSearch] = useState("");
 
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [showPriceMenu, setShowPriceMenu] = useState(false);
+
+  // 👤 ESTUDIANTE LOGEADO
+  const [student, setStudent] = useState({
+    nombre: "Estudiante",
+  });
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // 🔥 Obtiene el usuario logeado
+    const user =
+      JSON.parse(localStorage.getItem("user")) ||
+      JSON.parse(localStorage.getItem("usuario"));
+
+    if (user) {
+      setStudent({
+        nombre:
+          `${user.nombre || ""} ${user.apellidoPaterno || ""}`.trim() ||
+          user.name ||
+          "Estudiante",
+      });
+    }
+  }, []);
+
+  // 🔓 CERRAR SESIÓN
+  const logout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("usuario");
+    navigate("/login");
+  };
+
+  // 🔤 INICIAL DEL PERFIL
+  const firstLetter = student.nombre.charAt(0).toUpperCase();
+
+  const categories = [
+    "Programación",
+    "Backend",
+    "Frontend",
+    "Desarrollo",
+    "Negocios",
+  ];
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         let url = `http://localhost:9095/cursos?pageNumber=${page}&pageSize=6`;
 
-        if (categoria && categoria.trim() !== "") {
-          url += `&categoria=${categoria}`;
-        }
+        if (categoria.trim()) url += `&categoria=${categoria}`;
 
-        if (priceFilter) {
-          if (priceFilter === "0-50") url += `&precioMin=0&precioMax=50`;
-          if (priceFilter === "50-100") url += `&precioMin=50&precioMax=100`;
-          if (priceFilter === "100+") url += `&precioMin=100`;
-        }
+        if (priceFilter === "0-50")
+          url += `&precioMin=0&precioMax=50`;
+
+        if (priceFilter === "50-100")
+          url += `&precioMin=50&precioMax=100`;
+
+        if (priceFilter === "100+") url += `&precioMin=100`;
 
         const res = await fetch(url);
         const data = await res.json();
@@ -35,7 +86,6 @@ function Courses() {
         setTotalPages(data.totalPages || 0);
 
         window.scrollTo({ top: 0, behavior: "smooth" });
-
       } catch (err) {
         console.error(err);
         setCourses([]);
@@ -45,129 +95,259 @@ function Courses() {
     fetchCourses();
   }, [page, categoria, priceFilter]);
 
+  const filteredCourses = useMemo(() => {
+    return courses.filter((c) =>
+      (c.titulo || c.title || "")
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [courses, search]);
+
   const getPages = () => {
     const start = Math.max(0, page - 2);
     const end = Math.min(totalPages, page + 3);
-    return [...Array(end - start).keys()].map(i => start + i);
+
+    return [...Array(end - start).keys()].map((i) => start + i);
   };
 
   return (
     <div style={styles.container}>
+      {/* NAVBAR */}
+      <header style={styles.navbar}>
+        {/* LOGO */}
+        <Link to="/dashboard2" style={styles.logoWrap}>
+          <div style={styles.logoBadge}>🎓</div>
 
-      {/* 🔥 NAVBAR COMPLETO */}
-      <div style={styles.navbar}>
+          <h2 style={styles.logoText}>
+            EduPlatform
+          </h2>
+        </Link>
+        <div style={styles.navCenter}>
+          {/* SEARCH */}
+          <div style={styles.searchBox}>
+            <FaSearch style={{ color: "#64748b", marginRight: 8 }} />
 
-        <h2 style={{ color: "#1e293b" }}>EduPlatform</h2>
+            <input
+              type="text"
+              placeholder="Buscar cursos..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
 
-        {/* 🔥 FILTROS EN NAVBAR */}
-        <div style={{ display: "flex", gap: "15px" }}>
+          {/* FILTERS */}
+          <div style={styles.filterRow}>
+            <div style={styles.menuTrigger}>
+              <span
+                onClick={() => {
+                  setShowCategoryMenu(!showCategoryMenu);
+                  setShowPriceMenu(false);
+                }}
+              >
+                <FaFilter style={{ marginRight: 6 }} />
+                Categoría {showCategoryMenu ? "▲" : "▼"}
+              </span>
 
-          {/* CATEGORÍA */}
-          <div style={styles.menuTrigger}>
-            <span onClick={() => {
-              setShowCategoryMenu(!showCategoryMenu);
-              setShowPriceMenu(false);
-            }}>
-              Categoría {showCategoryMenu ? "▼" : "▲"}
-            </span>
+              {showCategoryMenu && (
+                <div style={styles.dropdown}>
+                  {categories.map((cat) => (
+                    <p
+                      key={cat}
+                      style={styles.categoryItem}
+                      onClick={() => {
+                        setCategoria(cat);
+                        setPage(0);
+                        setShowCategoryMenu(false);
+                      }}
+                    >
+                      {cat}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            {showCategoryMenu && (
-              <div style={styles.dropdown}>
-                {["Programación","Backend","Frontend","Desarrollo", "negocios"].map((cat) => (
+            <div style={styles.menuTrigger}>
+              <span
+                onClick={() => {
+                  setShowPriceMenu(!showPriceMenu);
+                  setShowCategoryMenu(false);
+                }}
+              >
+                💰 Precio {showPriceMenu ? "▲" : "▼"}
+              </span>
+
+              {showPriceMenu && (
+                <div style={styles.dropdown}>
+                  <p
+                    onClick={() => {
+                      setPriceFilter("0-50");
+                      setPage(0);
+                      setShowPriceMenu(false);
+                    }}
+                    style={styles.categoryItem}
+                  >
+                    $0 - $50
+                  </p>
 
                   <p
-                    key={cat}
-                    style={styles.categoryItem}
-                    onMouseEnter={(e) => e.target.style.background = "#f1f5f9"}
-                    onMouseLeave={(e) => e.target.style.background = "transparent"}
                     onClick={() => {
-                      setCategoria(cat);
+                      setPriceFilter("50-100");
                       setPage(0);
-                      setShowCategoryMenu(false);
+                      setShowPriceMenu(false);
                     }}
+                    style={styles.categoryItem}
                   >
-                    {cat}
+                    $50 - $100
                   </p>
-                ))}
-              </div>
-            )}
+
+                  <p
+                    onClick={() => {
+                      setPriceFilter("100+");
+                      setPage(0);
+                      setShowPriceMenu(false);
+                    }}
+                    style={styles.categoryItem}
+                  >
+                    $100+
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => {
+                setCategoria("");
+                setPriceFilter("");
+                setSearch("");
+                setPage(0);
+              }}
+              style={styles.resetButton}
+            >
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        {/* 👤 PERFIL DEL ESTUDIANTE */}
+        <div style={styles.profileBox}>
+          <div style={styles.avatar}>
+            {firstLetter}
           </div>
 
-          {/* PRECIO */}
-          <div style={styles.menuTrigger}>
-            <span onClick={() => {
-              setShowPriceMenu(!showPriceMenu);
-              setShowCategoryMenu(false);
-            }}>
-              Precio {showPriceMenu ? "▼" : "▲"}
-            </span>
+          <div>
+            <h4 style={styles.userName}>
+              {student.nombre}
+            </h4>
 
-            {showPriceMenu && (
-              <div style={styles.dropdown}>
-                <p onClick={() => { setPriceFilter("0-50"); setPage(0); }} style={styles.categoryItem}>0 - 50</p>
-                <p onClick={() => { setPriceFilter("50-100"); setPage(0); }} style={styles.categoryItem}>50 - 100</p>
-                <p onClick={() => { setPriceFilter("100+"); setPage(0); }} style={styles.categoryItem}>100+</p>
-              </div>
-            )}
+            <p style={styles.userRole}>
+              Estudiante
+            </p>
           </div>
 
-          {/* RESET */}
           <button
-            onClick={() => {
-              setCategoria("");
-              setPriceFilter("");
-              setPage(0);
-            }}
-            style={styles.resetButton}
+            onClick={logout}
+            style={styles.logoutBtn}
           >
-            Limpiar
+            <FaSignOutAlt />
           </button>
-
         </div>
+      </header>
 
-        {/* 🔥 USUARIO */}
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <FaUser style={{ marginRight: "10px", color: "#4f46e5" }} />
+      {/* HERO */}
+      <section style={styles.hero}>
+        <h1 style={styles.title}>
+          Bienvenido {student.nombre} 🚀
+        </h1>
 
-          <Link to="/login" style={styles.link}>Login</Link>
-          <Link to="/register" style={styles.link}>Register</Link>
-        </div>
-      </div>
+        <p style={styles.subtitle}>
+          Explora cursos premium y continúa creciendo profesionalmente
+        </p>
+      </section>
 
-      <h1 style={styles.title}>Catálogo de Cursos 📚</h1>
-
-      {/* 🔥 GRID */}
+      {/* GRID */}
       <div style={styles.grid}>
-        {courses.length === 0 ? (
-          <p style={{ color: "white" }}>No hay cursos</p>
+        {filteredCourses.length === 0 ? (
+          <div style={styles.emptyBox}>
+            <h3 style={{ color: "#fff", fontSize: "28px" }}>
+              No hay cursos disponibles
+            </h3>
+
+            <p style={{ color: "#cbd5e1" }}>
+              Prueba con otro filtro o búsqueda
+            </p>
+          </div>
         ) : (
-          courses.map((c) => (
-            <div key={c.id} style={styles.card}>
-              <img src={c.imagen || c.image} style={styles.image} />
+          filteredCourses.map((c) => (
+            <div
+              key={c.id}
+              style={styles.card}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform =
+                  "translateY(-8px)";
+                e.currentTarget.style.boxShadow =
+                  "0 25px 50px rgba(0,0,0,0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform =
+                  "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 12px 30px rgba(0,0,0,0.15)";
+              }}
+            >
+              <img
+                src={c.imagen || c.image}
+                alt={c.titulo || c.title}
+                style={styles.image}
+              />
 
               <div style={styles.content}>
-                <h3>{c.titulo || c.title}</h3>
+                <div style={styles.badgeRow}>
+                  <span style={styles.badge}>
+                    {c.categoria || c.category}
+                  </span>
 
-                <p>📂 {c.categoria || c.category}</p>
-                <p>💰 ${c.precio || c.price}</p>
+                  <span style={styles.rating}>
+                    <FaStar size={12} /> 4.8
+                  </span>
+                </div>
 
-                <button style={styles.button}>
-                  Ver curso
-                </button>
+                <h3 style={styles.cardTitle}>
+                  {c.titulo || c.title}
+                </h3>
+
+                <div style={styles.metaRow}>
+                  <span style={styles.meta}>
+                    <FaClock size={12} /> 8 horas
+                  </span>
+
+                  <span style={styles.price}>
+                    ${c.precio || c.price}
+                  </span>
+                </div>
+
+                <Link
+                  to={`/curso/${c.id}`}
+                  state={{ curso: c }}
+                  style={{ textDecoration: "none" }}
+                >
+                  <button style={styles.button}>Ver curso</button>
+                </Link>
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* 🔥 PAGINACIÓN */}
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
-
+      {/* PAGINATION */}
+      <div style={styles.pagination}>
         <button
           disabled={page === 0}
           onClick={() => setPage(page - 1)}
+          style={styles.pageBtn}
         >
-          ⬅
+          <FaChevronLeft />
         </button>
 
         {getPages().map((num) => (
@@ -175,8 +355,10 @@ function Courses() {
             key={num}
             onClick={() => setPage(num)}
             style={{
-              margin: "0 5px",
-              fontWeight: page === num ? "bold" : "normal"
+              ...styles.pageBtn,
+              ...(page === num
+                ? styles.pageBtnActive
+                : {}),
             }}
           >
             {num + 1}
@@ -186,153 +368,310 @@ function Courses() {
         <button
           disabled={page + 1 >= totalPages}
           onClick={() => setPage(page + 1)}
+          style={styles.pageBtn}
         >
-          ➡
+          <FaChevronRight />
         </button>
-
       </div>
-
     </div>
   );
 }
 
-//////////////////////////////////////
-// 🎨 ESTILOS PRO (MISMO LOGIN)
-//////////////////////////////////////
-
 const styles = {
   container: {
     minHeight: "100vh",
-    backgroundImage: `
-      linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-      url('https://images.unsplash.com/photo-1523240795612-9a054b0db644')
-    `,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
+    background:
+      "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)",
+    fontFamily: "Arial, sans-serif",
   },
 
   navbar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "18px 32px",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(14px)",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    position: "sticky",
+    top: 0,
+    zIndex: 1000,
+  },
+
+logoWrap: {
   display: "flex",
-  justifyContent: "space-between",
   alignItems: "center",
-  padding: "15px 30px",
-  background: "rgba(255,255,255,0.9)",
-  backdropFilter: "blur(10px)",
-  position: "relative",   // 🔥 CLAVE
-  zIndex: 1000            // 🔥 CLAVE
+  gap: "10px",
+  textDecoration: "none",
+  cursor: "pointer",
 },
+
+  logoBadge: {
+    width: "42px",
+    height: "42px",
+    borderRadius: "14px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background:
+      "linear-gradient(135deg, #4f46e5, #7c3aed)",
+    fontSize: "20px",
+  },
+
+  logoText: {
+    color: "#fff",
+    margin: 0,
+    fontSize: "24px",
+  },
+
+  navCenter: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+
+  searchBox: {
+    display: "flex",
+    alignItems: "center",
+    background: "#fff",
+    padding: "10px 14px",
+    borderRadius: "14px",
+    width: "320px",
+  },
+
+  searchInput: {
+    border: "none",
+    outline: "none",
+    width: "100%",
+    fontSize: "14px",
+  },
+
+  filterRow: {
+    display: "flex",
+    gap: "12px",
+  },
 
   menuTrigger: {
     position: "relative",
     cursor: "pointer",
     fontWeight: "bold",
-    padding: "8px 14px",
-    borderRadius: "8px",
-    background: "#f1f5f9"
+    padding: "10px 14px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.12)",
+    color: "#fff",
   },
 
   dropdown: {
-  position: "absolute",
-  top: "60px",
-  left: "50%",
-  transform: "translateX(-50%)",
-  minWidth: "220px",
-  background: "rgba(255,255,255,0.98)",
-  padding: "15px 10px",
-  borderRadius: "14px",
-  boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-  backdropFilter: "blur(12px)",
-  zIndex: 9999,
-  animation: "fadeDown 0.25s ease"
-},
-categoryItem: {
-  padding: "10px 15px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  transition: "0.2s",
-},
-card: {
-  position: "relative",
-  zIndex: 1   // bajo
-},
-  categoryItem: {
-    cursor: "pointer",
-    padding: "6px"
+    position: "absolute",
+    top: "55px",
+    left: 0,
+    minWidth: "200px",
+    background: "#fff",
+    borderRadius: "14px",
+    padding: "10px",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+    zIndex: 999,
   },
 
-  link: {
-    marginLeft: "10px",
-    padding: "8px 16px",
-    borderRadius: "8px",
-    border: "1px solid #4f46e5",
-    background: "rgba(79,70,229,0.1)",
-    textDecoration: "none",
-    color: "#4f46e5",
-    fontWeight: "bold"
+  categoryItem: {
+    padding: "10px 12px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    color: "#0f172a",
+  },
+
+  resetButton: {
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "12px",
+    background: "#ef4444",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  /* 👤 PERFIL */
+  profileBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    background: "rgba(255,255,255,0.1)",
+    padding: "10px 14px",
+    borderRadius: "16px",
+  },
+
+  avatar: {
+    width: "44px",
+    height: "44px",
+    borderRadius: "50%",
+    background:
+      "linear-gradient(135deg, #4f46e5, #7c3aed)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: "18px",
+  },
+
+  userName: {
+    margin: 0,
+    color: "#fff",
+    fontSize: "14px",
+  },
+
+  userRole: {
+    margin: 0,
+    color: "#cbd5e1",
+    fontSize: "12px",
+  },
+
+  logoutBtn: {
+    border: "none",
+    background: "rgba(239,68,68,0.15)",
+    color: "#fff",
+    width: "38px",
+    height: "38px",
+    borderRadius: "12px",
+    cursor: "pointer",
+  },
+
+  hero: {
+    textAlign: "center",
+    padding: "60px 20px 30px",
   },
 
   title: {
-    textAlign: "center",
     color: "#fff",
-    fontSize: "42px",
-    marginTop: "30px",
-    textShadow: "2px 2px 10px rgba(0,0,0,0.7)"
+    fontSize: "52px",
+    marginBottom: "10px",
+    fontWeight: "bold",
   },
 
- grid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-  gap: "20px",
-  padding: "30px",
-  position: "relative",
-  zIndex: 1   // 🔥 MÁS BAJO
-},
+  subtitle: {
+    color: "#cbd5e1",
+    fontSize: "18px",
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "24px",
+    padding: "30px",
+  },
 
   card: {
-    background: "rgba(255,255,255,0.95)",
-    borderRadius: "12px",
+    background: "rgba(255,255,255,0.96)",
+    borderRadius: "22px",
     overflow: "hidden",
-    backdropFilter: "blur(10px)",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-    transition: "0.3s"
+    boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+    transition: "all 0.3s ease",
   },
 
   image: {
     width: "100%",
-    height: "150px",
-    objectFit: "cover"
+    height: "180px",
+    objectFit: "cover",
   },
 
   content: {
-    padding: "15px"
+    padding: "18px",
+  },
+
+  badgeRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "12px",
+  },
+
+  badge: {
+    background: "#e0e7ff",
+    color: "#4338ca",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: "bold",
+  },
+
+  rating: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    color: "#f59e0b",
+    fontSize: "13px",
+    fontWeight: "bold",
+  },
+
+  cardTitle: {
+    fontSize: "20px",
+    color: "#0f172a",
+    marginBottom: "14px",
+  },
+
+  metaRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+  },
+
+  meta: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    color: "#64748b",
+    fontSize: "13px",
+  },
+
+  price: {
+    color: "#4f46e5",
+    fontWeight: "bold",
+    fontSize: "22px",
   },
 
   button: {
     width: "100%",
-    padding: "10px",
-    background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-    color: "#fff",
+    padding: "12px",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "14px",
+    background:
+      "linear-gradient(135deg, #4f46e5, #7c3aed)",
+    color: "#fff",
+    fontWeight: "bold",
     cursor: "pointer",
-    marginTop: "10px"
+    fontSize: "15px",
   },
 
-  resetButton: {
-    margin: "15px",
-    padding: "10px 18px",
-    background: "#ef4444",
-    color: "#fff",
+  emptyBox: {
+    gridColumn: "1 / -1",
+    textAlign: "center",
+    padding: "60px 20px",
+  },
+
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "10px",
+    padding: "20px 0 40px",
+  },
+
+  pageBtn: {
+    width: "42px",
+    height: "42px",
     border: "none",
-    borderRadius: "8px",
-    cursor: "pointer"
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.12)",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: "bold",
   },
 
-  dateInput: {
-    padding: "8px",
-    borderRadius: "8px",
-    border: "1px solid #ccc"
-  }
+  pageBtnActive: {
+    background:
+      "linear-gradient(135deg, #4f46e5, #7c3aed)",
+  },
 };
 
 export default Courses;
