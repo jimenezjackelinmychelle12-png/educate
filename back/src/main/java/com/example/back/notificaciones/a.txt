@@ -1,1 +1,12 @@
 
+CREATE TABLE bandeja (
+    id BIGSERIAL PRIMARY KEY,
+    titulo VARCHAR(255),
+    mensaje VARCHAR(1000),
+    email_emisor VARCHAR(255),
+    email_destino VARCHAR(255),
+    fecha_envio TIMESTAMP,
+    leido BOOLEAN DEFAULT FALSE,
+    archivado BOOLEAN DEFAULT FALSE,
+    eliminado BOOLEAN DEFAULT FALSE
+);
